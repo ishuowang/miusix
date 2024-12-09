@@ -1,5 +1,5 @@
 
-import { Howl } from "howler";
+import { Howl, Howler } from "howler";
 import {TrackMetaData} from "@/types/types";
 
 class Miusix {
@@ -11,6 +11,7 @@ class Miusix {
   public hooks : MiusixHooks;
 
   private constructor() {
+    Howler.usingWebAudio = true;
     this.howler = new Howl({
       src: [""],
       html5: true,
