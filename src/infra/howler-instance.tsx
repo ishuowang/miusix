@@ -102,9 +102,11 @@ class Miusix {
     });
     navigator.mediaSession.setActionHandler("play", () => {
       /* Code excerpted. */
+      this.resume()
     });
     navigator.mediaSession.setActionHandler("pause", () => {
       /* Code excerpted. */
+      this.pause()
     });
     navigator.mediaSession.setActionHandler("stop", () => {
       /* Code excerpted. */
