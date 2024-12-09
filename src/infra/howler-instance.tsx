@@ -16,6 +16,13 @@ class Miusix {
       html5: true,
       onend: ()=>{
         this.playNext()
+      },
+      onplay: ()=>{
+        navigator.mediaSession.playbackState = 'playing';
+        this.setupMediaSession()
+      },
+      onpause: ()=>{
+        navigator.mediaSession.playbackState = 'paused';
       }
     })
     this.tracks = new Playlist()
@@ -87,7 +94,6 @@ class Miusix {
   private setupMediaSession() {
     const track = this.tracks.getCurrentTrack();
     console.log('[setupMediaSession]', track);
-    // navigator.mediaSession.playbackState = 'playing';
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.title,
       artist: track.artists?.join(","),
