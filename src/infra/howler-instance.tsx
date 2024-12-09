@@ -11,7 +11,7 @@ class Miusix {
   public hooks : MiusixHooks;
 
   private constructor() {
-    Howler.usingWebAudio = true;
+    Howler.usingWebAudio = false;
     this.howler = new Howl({
       src: [""],
       html5: true,
