@@ -100,45 +100,6 @@ class Miusix {
       album: track.album,
       artwork: track.thumbnail? [{src: track.thumbnail}] : [],
     });
-    navigator.mediaSession.setActionHandler("play", () => {
-      /* Code excerpted. */
-      this.resume()
-    });
-    navigator.mediaSession.setActionHandler("pause", () => {
-      /* Code excerpted. */
-      this.pause()
-    });
-    navigator.mediaSession.setActionHandler("stop", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("seekbackward", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("seekforward", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("seekto", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("previoustrack", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("nexttrack", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("skipad", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("togglecamera", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("togglemicrophone", () => {
-      /* Code excerpted. */
-    });
-    navigator.mediaSession.setActionHandler("hangup", () => {
-      /* Code excerpted. */
-    });
-  
   }
 }
 
