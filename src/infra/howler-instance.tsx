@@ -56,7 +56,7 @@ class Miusix {
   public sound() {
     this.howler.play()
     this.setupMediaSession()
-    this.hooks.setTrack(Object.create(this.tracks.getCurrentTrack()))
+    this.hooks.setTrack(JSON.parse(JSON.stringify(this.tracks.getCurrentTrack())))
   }
 
   public resume() {
