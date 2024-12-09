@@ -34,6 +34,12 @@ class Miusix {
       setLoop:()=>{},
       setPlaylist:()=>{},
     };
+
+    setInterval(()=>{
+      if (this.howler.playing()) {
+        this.howler.seek() > this.tracks.getCurrentTrack().duration - 1 ? this.playNext() : ""
+      }
+    },1000)
   }
 
   public static getInstance(): Miusix {
@@ -100,6 +106,10 @@ class Miusix {
       album: track.album,
       artwork: track.thumbnail? [{src: track.thumbnail}] : [],
     });
+    navigator.mediaSession.setPositionState({
+      position: this.howler.seek(),
+      duration: track.duration,
+    })
   }
 }
 
