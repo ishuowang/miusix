@@ -93,13 +93,49 @@ class Miusix {
 
   private setupMediaSession() {
     const track = this.tracks.getCurrentTrack();
-    console.log('[setupMediaSession]', track);
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.title,
       artist: track.artists?.join(","),
       album: track.album,
       artwork: track.thumbnail? [{src: track.thumbnail}] : [],
     });
+    navigator.mediaSession.setActionHandler("play", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("stop", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("seekbackward", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("seekforward", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("seekto", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("previoustrack", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("skipad", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("togglecamera", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("togglemicrophone", () => {
+      /* Code excerpted. */
+    });
+    navigator.mediaSession.setActionHandler("hangup", () => {
+      /* Code excerpted. */
+    });
+  
   }
 }
 
