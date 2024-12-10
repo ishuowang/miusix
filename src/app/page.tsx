@@ -19,7 +19,7 @@ export default function Home() {
 }
 
 const TrackCards = async () => {
-  const data = await fetch("http://185.148.13.236:4000/playlist.json")
+  const data = await fetch("http://185.148.13.236:4000/playlist.json",{ cache: 'no-store' })
   const tracks = await data.json();
 
   return (
