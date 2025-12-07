@@ -3,7 +3,7 @@ import {TrackMetaData} from "@/types/types";
 const getAudioUrl = (formats: any[]): string => {
   const arr = formats.filter(e => {return e.vcodec === "none" && e.acodec && e.acodec.includes("mp4")}).sort((a, b)=>{return b.filesize - a.filesize});
   // let arr = formats.filter(e => {return e.ext && e.ext === "mp4" && e.protocol && e.protocol.includes("http")}).sort((a, b)=>{return a.filesize - b.filesize});
-  return arr[0].url;
+  return arr[0]?.url;
 }
 
 const parser = (data: any) :TrackMetaData => {

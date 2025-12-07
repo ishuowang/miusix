@@ -3,6 +3,7 @@ import ClientTrackCardPlayButton from "@/component/client-track-card-play-button
 import ClientTrackController from "@/component/client-track-controller";
 import Header from "@/component/header";
 import {TrackMetaData} from "@/types/types";
+import test from "@/infra/api";
 
 export default function Home() {
 
@@ -12,16 +13,29 @@ export default function Home() {
       <Header />
       <ClientTrackController />
       <TrackCards/>
-
       <Footer/>
     </>
   );
 }
 
 const TrackCards = async () => {
-  const data = await fetch("http://185.148.13.236:4000/playlist.json",{ cache: 'no-store' })
-  const tracks = await data.json();
-
+  // const data = await fetch("http://185.148.13.236:4000/playlist.json",{ cache: 'no-store' })
+  // const tracks = await data.json();
+  const tracks = [{
+    id: "string",
+      title: "string",
+      album: "string",
+      artists: ["string[]"],
+      description: "string",
+      audio: "string",
+      thumbnail: "string",
+      duration: 1,
+      formats: [],
+      heatmap: {},
+      thumbnails: {},
+      webpage_url: "string",
+  }]
+  console.log(test())
   return (
     <>
     <div className="hero min-h-screen">
@@ -43,7 +57,7 @@ const TrackCards = async () => {
                     </div>
                   </div>
 
-                  <div className="stat w-36  ">
+                  <div className="stat w-36">
                     <div className="stat-title font-mono text-secondary">
                       <p className="w-24 overflow-hidden text-clip ">{_track.album}</p>
                     </div>
