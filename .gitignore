@@ -12,3 +12,4 @@ apps/*/.env*
 !apps/*/.env.example
 storage/media/*
 !storage/media/.gitkeep
+.vercel
