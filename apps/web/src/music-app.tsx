@@ -519,7 +519,6 @@ export default function MusicApp({ initialTracks }: Props) {
   const [activeId, setActiveId] = useState(initialTracks[0]?.id ?? "");
   const [playing, setPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(38);
-  const [viewMode, setViewMode] = useState<ViewMode>("web");
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MediaSearchResult[]>([]);
   const [localSearchResults, setLocalSearchResults] = useState<Track[]>([]);
@@ -775,6 +774,12 @@ export default function MusicApp({ initialTracks }: Props) {
     }
   }
 
+  function changeView(mode: ViewMode) {
+    if (mode === "ios") {
+      window.location.assign("/ios/");
+    }
+  }
+
   const sharedOverlays = (
     <>
       <PlaylistPicker
@@ -797,43 +802,6 @@ export default function MusicApp({ initialTracks }: Props) {
       />
     </>
   );
-
-  if (viewMode === "ios") {
-    return (
-      <>
-        <IosPreview
-          activeTrack={activeTrack}
-          tracks={tracks}
-          playlists={playlists}
-          queueCount={queueIds.length}
-          playing={playing}
-          favorite={favorites.has(activeTrack.id)}
-          favoriteCount={favorites.size}
-          elapsed={elapsed}
-          query={query}
-          searchResults={searchResults}
-          localSearchResults={localSearchResults}
-          searchStatus={searchStatus}
-          searchMessage={searchMessage}
-          onPlayPause={() => setPlaying(!playing)}
-          onFavorite={toggleFavorite}
-          onMove={move}
-          onSeek={seek}
-          onQueryChange={setQuery}
-          onSearch={search}
-          onSearchResult={importSearchResult}
-          onLocalSearchResult={selectTrack}
-          onSelectTrack={selectTrack}
-          onAddToPlaylist={setPlaylistTrack}
-          onCreatePlaylist={createPlaylist}
-          onQueuePlaylist={queuePlaylist}
-          onOpenQueue={() => setQueueOpen(true)}
-          onViewChange={setViewMode}
-        />
-        {sharedOverlays}
-      </>
-    );
-  }
 
   return (
     <main className="studio-shell">
@@ -863,7 +831,7 @@ export default function MusicApp({ initialTracks }: Props) {
             <button type="submit">{searchStatus === "searching" ? "Searching…" : "Search"}</button>
           </form>
           <div className="studio-topbar__actions">
-            <ViewToggle value={viewMode} onChange={setViewMode} />
+            <ViewToggle value="web" onChange={changeView} />
             <button className="studio-server" type="button" onClick={checkServer}>Check server</button>
           </div>
         </header>

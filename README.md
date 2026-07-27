@@ -52,7 +52,11 @@ It keeps the entire listening loop in one TypeScript monorepo:
   </tr>
 </table>
 
-The Web player is a responsive library, search, playlist, and queue workspace. Switch to the iOS view to use the same playback state through a leather, vinyl, brushed-metal, and LCD-inspired interface.
+The two interfaces are deliberately isolated instead of restyling one React
+tree. [`/`](https://miusix.vercel.app/) is the functional Web library, search,
+playlist, and queue workspace. [`/ios/`](https://miusix.vercel.app/ios/) runs
+the original standalone tactile HTML bundle with its own turntable, search,
+favorites, playlists, and hardware customization interactions.
 
 ## How the pieces connect
 
@@ -132,7 +136,7 @@ The audio file lives in `storage/media` or object storage. PostgreSQL/Supabase k
 ```text
 miusix/
 ├── apps/
-│   ├── web/          React 19 + Vite player
+│   ├── web/          React 19 Web app + isolated /ios HTML app
 │   ├── mobile/       Expo foundation for iOS and Android
 │   └── api/          Fastify API, yt-dlp adapter, range streaming
 ├── packages/
