@@ -832,6 +832,7 @@ export default function MusicApp({ initialTracks }: Props) {
   }
 
   function changeView(mode: ViewMode) {
+    setPlaying(false);
     const nextPath = mode === "ios" ? "/ios/" : "/";
     if (window.location.pathname !== nextPath) {
       window.history.pushState({}, "", nextPath);
