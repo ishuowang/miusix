@@ -124,6 +124,8 @@ type IosPreviewProps = {
   tracks: Track[];
   playing: boolean;
   favorite: boolean;
+  favoriteCount: number;
+  elapsed: number;
   query: string;
   searchResults: MediaSearchResult[];
   localSearchResults: Track[];
@@ -131,6 +133,8 @@ type IosPreviewProps = {
   searchMessage: string;
   onPlayPause: () => void;
   onFavorite: () => void;
+  onMove: (direction: number) => void;
+  onSeek: (seconds: number) => void;
   onQueryChange: (query: string) => void;
   onSearch: (event: React.FormEvent<HTMLFormElement>) => void;
   onSearchResult: (result: MediaSearchResult) => void;
@@ -144,6 +148,8 @@ function IosPreview({
   tracks,
   playing,
   favorite,
+  favoriteCount,
+  elapsed,
   query,
   searchResults,
   localSearchResults,
@@ -151,6 +157,8 @@ function IosPreview({
   searchMessage,
   onPlayPause,
   onFavorite,
+  onMove,
+  onSeek,
   onQueryChange,
   onSearch,
   onSearchResult,
@@ -158,12 +166,16 @@ function IosPreview({
   onSelectTrack,
   onViewChange
 }: IosPreviewProps) {
-  function scrollTo(selector: string) {
-    document.querySelector(selector)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  const [page, setPage] = useState<"play" | "search" | "me">("play");
+  const remaining = Math.max(0, activeTrack.durationSeconds - elapsed);
+  const visibleResults = searchResults.length
+    ? searchResults
+    : localSearchResults.length
+      ? localSearchResults
+      : tracks;
 
   return (
-    <main className="ios-stage">
+    <main className="ios-stage ios-stage--skeuo">
       <header className="ios-preview-header">
         <a className="ios-preview-brand" href="#" aria-label="Miusix home">
           <span className="brand-mark">M</span>
@@ -173,109 +185,192 @@ function IosPreview({
         <ViewToggle value="ios" onChange={onViewChange} inverse />
       </header>
 
-      <section className="iphone" aria-label="Miusix iOS application preview">
-        <div className="iphone__island" aria-hidden="true" />
-        <div className="iphone__screen">
-          <div className="ios-statusbar" aria-hidden="true">
-            <span>9:41</span>
-            <span>● ᯤ ▰</span>
-          </div>
-
-          <div className="ios-app-header">
-            <div>
-              <span className="eyebrow">Good evening</span>
-              <strong>MIUSIX</strong>
+      <section className="iphone skeuo-phone" aria-label="Miusix iOS turntable interface">
+        <div className="iphone__screen skeuo-screen">
+          <div className="skeuo-leather">
+            <div className="skeuo-stitch" aria-hidden="true" />
+            <div className="skeuo-statusbar" aria-hidden="true">
+              <span>9:41</span>
+              <span>▮▮▮ ᯤ ▱</span>
             </div>
-            <span className="ios-avatar">SW</span>
-          </div>
 
-          <div className="ios-scroll">
-            <form className="ios-search" onSubmit={onSearch}>
-              <span>⌕</span>
-              <input
-                aria-label="Search music"
-                placeholder="Artists, albums, tracks"
-                value={query}
-                onChange={(event) => onQueryChange(event.target.value)}
-              />
-              <button type="submit" aria-label="Submit search">→</button>
-            </form>
-            <SearchResults
-              compact
-              results={searchResults}
-              localResults={localSearchResults}
-              status={searchStatus}
-              message={searchMessage}
-              onSelect={onSearchResult}
-              onLocalSelect={onLocalSearchResult}
-            />
+            <div className="skeuo-page">
+              {page === "play" && (
+                <>
+                  <span className="skeuo-plaque">{playing ? "正 在 播 放" : "已 暂 停"}</span>
+                  <section className="skeuo-turntable" aria-label="Turntable">
+                    <button
+                      type="button"
+                      className={`skeuo-vinyl ${playing ? "skeuo-vinyl--playing" : ""}`}
+                      aria-label={playing ? "Pause record" : "Play record"}
+                      onClick={onPlayPause}
+                    >
+                      <span className="skeuo-vinyl__shine" />
+                      <span
+                        className="skeuo-vinyl__label"
+                        style={{ "--label-color": activeTrack.artwork.background } as React.CSSProperties}
+                      >
+                        <strong>{activeTrack.title}</strong>
+                        <small>{activeTrack.artist}</small>
+                      </span>
+                    </button>
+                    <div className={`skeuo-tonearm ${playing ? "skeuo-tonearm--down" : ""}`} aria-hidden="true">
+                      <i className="skeuo-tonearm__pivot" />
+                      <i className="skeuo-tonearm__tube" />
+                      <i className="skeuo-tonearm__head" />
+                    </div>
+                  </section>
 
-            <section className="ios-mix">
-              <span className="eyebrow">Miusix original · 04</span>
-              <i aria-hidden="true" />
-              <h1>Night drive,<br />no destination.</h1>
-              <p>Warm synths and soft static for the road home.</p>
-              <button type="button" onClick={() => !playing && onPlayPause()}>
-                ▶&nbsp;&nbsp; Play mix
-              </button>
-            </section>
+                  <section className="skeuo-console">
+                    <div className="skeuo-lcd">
+                      <div className="skeuo-lcd__meta">
+                        <strong>{formatTime(elapsed)}</strong>
+                        <span>{tracks.findIndex((track) => track.id === activeTrack.id) + 1 || 1} / {tracks.length}</span>
+                        <strong>-{formatTime(remaining)}</strong>
+                      </div>
+                      <input
+                        aria-label="iOS playback position"
+                        type="range"
+                        min="0"
+                        max={activeTrack.durationSeconds}
+                        value={Math.min(elapsed, activeTrack.durationSeconds)}
+                        onChange={(event) => onSeek(Number(event.target.value))}
+                      />
+                      <div className="skeuo-lcd__track">
+                        <strong>{activeTrack.title}</strong>
+                        <small>{activeTrack.artist}</small>
+                      </div>
+                    </div>
+                    <button
+                      className={`skeuo-heart ${favorite ? "skeuo-heart--active" : ""}`}
+                      type="button"
+                      aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
+                      aria-pressed={favorite}
+                      onClick={onFavorite}
+                    >
+                      {favorite ? "♥" : "♡"}
+                    </button>
+                    <div className="skeuo-transport">
+                      <button type="button" aria-label="Previous track" onClick={() => onMove(-1)}>◀</button>
+                      <button className="skeuo-play" type="button" aria-label={playing ? "Pause" : "Play"} onClick={onPlayPause}>
+                        {playing ? "Ⅱ" : "▶"}
+                      </button>
+                      <button type="button" aria-label="Next track" onClick={() => onMove(1)}>▶</button>
+                    </div>
+                  </section>
 
-            <section className="ios-section">
-              <div className="ios-section-heading">
-                <div><span className="eyebrow">Curated for this hour</span><h2>Made for you</h2></div>
-                <button type="button" onClick={() => scrollTo(".ios-albums")}>See all →</button>
-              </div>
-              <div className="ios-albums">
-                {tracks.map((track) => (
-                  <button type="button" key={track.id} onClick={() => onSelectTrack(track)}>
-                    <Artwork track={track} />
-                    <strong>{track.title}</strong>
-                    <small>{track.artist}</small>
+                  <section className="skeuo-up-next">
+                    <span>接下来</span>
+                    {tracks.filter((track) => track.id !== activeTrack.id).slice(0, 2).map((track) => (
+                      <button type="button" key={track.id} onClick={() => onSelectTrack(track)}>
+                        <i style={{ "--disc-label": track.artwork.background } as React.CSSProperties} />
+                        <span><strong>{track.title}</strong><small>{track.artist}</small></span>
+                        <time>{formatTime(track.durationSeconds)}</time>
+                      </button>
+                    ))}
+                  </section>
+                </>
+              )}
+
+              {page === "search" && (
+                <section className="skeuo-search-page">
+                  <span className="skeuo-plaque">搜 索</span>
+                  <form className="skeuo-search" onSubmit={onSearch}>
+                    <span>⌕</span>
+                    <input
+                      aria-label="Search music"
+                      placeholder="搜索歌曲、歌手…"
+                      value={query}
+                      onChange={(event) => onQueryChange(event.target.value)}
+                    />
+                    <button type="submit" aria-label="Submit search">↵</button>
+                  </form>
+                  <div className="skeuo-chips" aria-label="Search suggestions">
+                    {["白鹭", "陈屿", "南方", "雾"].map((chip) => (
+                      <button type="button" key={chip} onClick={() => onQueryChange(chip)}>{chip}</button>
+                    ))}
+                  </div>
+                  <div className="skeuo-results-heading">
+                    <strong>{query.trim() ? "搜索结果" : "热门歌曲"}</strong>
+                    <span>{searchStatus === "searching" ? "搜索中…" : searchStatus === "importing" ? "缓存中…" : searchMessage}</span>
+                  </div>
+                  {searchStatus === "error" && <p className="skeuo-error">{searchMessage}</p>}
+                  <div className="skeuo-results">
+                    {visibleResults.map((item) => {
+                      const isRemote = "sourceId" in item;
+                      return (
+                        <button
+                          type="button"
+                          key={isRemote ? item.sourceId : item.id}
+                          disabled={searchStatus === "importing"}
+                          onClick={() => {
+                            if (isRemote) onSearchResult(item);
+                            else onLocalSearchResult(item);
+                            setPage("play");
+                          }}
+                        >
+                          <i style={{ "--disc-label": isRemote ? "#e8933c" : item.artwork.background } as React.CSSProperties} />
+                          <span><strong>{item.title}</strong><small>{item.artist}</small></span>
+                          <time>{formatTime(isRemote ? item.durationSeconds : item.durationSeconds)}</time>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {page === "me" && (
+                <section className="skeuo-profile-page">
+                  <span className="skeuo-plaque">个 人 主 页</span>
+                  <div className="skeuo-profile-card">
+                    <span className="skeuo-profile-avatar">岚</span>
+                    <span><strong>阿岚</strong><small>黑胶会员</small></span>
+                    <b>›</b>
+                  </div>
+                  <div className="skeuo-stats">
+                    <span><strong>{favoriteCount}</strong><small>收藏</small></span>
+                    <span><strong>{tracks.length}</strong><small>歌曲</small></span>
+                    <span><strong>0</strong><small>关注</small></span>
+                  </div>
+                  <strong className="skeuo-section-label">我的歌单</strong>
+                  <button className="skeuo-playlist-card" type="button" onClick={() => setPage("play")}>
+                    <i>♫</i>
+                    <span><strong>我的最爱</strong><small>{favoriteCount ? `${favoriteCount} 首` : "尚未收藏"}</small></span>
+                    <b>›</b>
                   </button>
-                ))}
-              </div>
-            </section>
+                  <strong className="skeuo-section-label">设置</strong>
+                  <div className="skeuo-settings">
+                    <button type="button"><span>唱机定制</span><small>皮革 · 拉丝铝</small></button>
+                    <button type="button"><span>音质设置</span><small>无损</small></button>
+                    <button type="button"><span>设备连接</span><small>本机扬声器</small></button>
+                  </div>
+                </section>
+              )}
+            </div>
 
-            <section className="ios-section ios-history">
-              <div className="ios-section-heading">
-                <div><span className="eyebrow">Your listening history</span><h2>Back in rotation</h2></div>
-              </div>
-              {tracks.map((track, index) => (
-                <button type="button" className="ios-track" key={track.id} onClick={() => onSelectTrack(track)}>
-                  <span>0{index + 1}</span>
-                  <Artwork track={track} compact />
-                  <span><strong>{track.title}</strong><small>{track.artist}</small></span>
-                  <span>•••</span>
+            <nav className="skeuo-tabs" aria-label="iOS navigation">
+              {([
+                ["play", "◉", "播放"],
+                ["search", "⌕", "搜索"],
+                ["me", "♙", "我的"],
+              ] as const).map(([tab, icon, label]) => (
+                <button
+                  className={page === tab ? "skeuo-tab--active" : ""}
+                  type="button"
+                  key={tab}
+                  onClick={() => setPage(tab)}
+                >
+                  <span>{icon}</span>
+                  <strong>{label}</strong>
+                  <i />
                 </button>
               ))}
-            </section>
+            </nav>
+            <span className="skeuo-home-indicator" aria-hidden="true" />
           </div>
-
-          <section className="ios-player" aria-label="Now playing">
-            <Artwork track={activeTrack} compact />
-            <span><strong>{activeTrack.title}</strong><small>{activeTrack.artist}</small></span>
-            <button
-              className={`ios-favorite ${favorite ? "ios-favorite--active" : ""}`}
-              type="button"
-              aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
-              aria-pressed={favorite}
-              onClick={onFavorite}
-            >
-              {favorite ? "♥" : "♡"}
-            </button>
-            <button type="button" aria-label={playing ? "Pause" : "Play"} onClick={onPlayPause}>
-              {playing ? "Ⅱ" : "▶"}
-            </button>
-          </section>
-
-          <nav className="ios-tabs" aria-label="iOS navigation">
-            <button type="button" onClick={() => scrollTo(".ios-scroll")}><span>⌂</span>Home</button>
-            <button type="button" onClick={() => scrollTo(".ios-search")}><span>⌕</span>Discover</button>
-            <button type="button" onClick={() => scrollTo(".ios-history")}><span>▤</span>Library</button>
-          </nav>
         </div>
       </section>
-      <p className="ios-preview-note">A browser preview of the shared iOS product language.</p>
+      <p className="ios-preview-note">A tactile turntable interface for the shared iOS player.</p>
     </main>
   );
 }
@@ -510,6 +605,8 @@ export default function MusicApp({ initialTracks }: Props) {
         tracks={tracks}
         playing={playing}
         favorite={favorites.has(activeTrack.id)}
+        favoriteCount={favorites.size}
+        elapsed={elapsed}
         query={query}
         searchResults={searchResults}
         localSearchResults={localSearchResults}
@@ -517,6 +614,8 @@ export default function MusicApp({ initialTracks }: Props) {
         searchMessage={searchMessage}
         onPlayPause={() => setPlaying(!playing)}
         onFavorite={toggleFavorite}
+        onMove={move}
+        onSeek={seek}
         onQueryChange={setQuery}
         onSearch={search}
         onSearchResult={importSearchResult}
