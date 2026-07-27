@@ -142,7 +142,18 @@ button:disabled { cursor: not-allowed !important; opacity: .38; }
   gap: 9px;
 }
 .search input { border: 0; outline: 0; background: transparent; flex: 1; min-width: 0; font-size: 12px; }
-.search kbd { border: 1px solid var(--line); border-radius: 5px; padding: 2px 5px; color: var(--muted); font: 9px "DM Mono"; }
+.search button {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 11px;
+  color: white;
+  background: var(--ink);
+  cursor: pointer;
+  font: 500 9px "DM Mono";
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.search button:hover { background: var(--orange); }
 .search-results {
   margin: 0 0 24px;
   padding: 18px;
@@ -324,6 +335,27 @@ button:disabled { cursor: not-allowed !important; opacity: .38; }
 .track-title small, .track-album, .track-time, .row-number { color: var(--muted); font-size: 9px; }
 .row-number, .track-time { font-family: "DM Mono"; }
 .row-more { text-align: right; }
+.section-count {
+  min-width: 28px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 9px;
+  text-align: center;
+  color: var(--muted);
+  font: 9px "DM Mono";
+}
+.empty-library {
+  width: 100%;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  font: 500 11px "Manrope", sans-serif;
+}
+.empty-library span { margin-right: 8px; color: var(--orange); font-size: 16px; }
+.empty-library:hover { border-color: var(--orange); color: var(--ink); }
 .player {
   height: 96px;
   border-top: 1px solid rgba(255,255,255,.13);
@@ -707,7 +739,7 @@ input[type="range"] { accent-color: var(--orange); height: 3px; width: 100%; }
   .nav-link { font-size: 0; padding: 8px 18px; }
   .content { width: 100%; }
   .topbar { height: 64px; grid-template-columns: 1fr auto auto; padding: 0 18px; gap: 8px; }
-  .history-buttons, .search kbd { display: none; }
+  .history-buttons, .search button { display: none; }
   .view-toggle button { padding: 6px 8px; font-size: 8px; }
   .ghost-button { font-size: 0; width: 34px; height: 34px; padding: 0; border-radius: 50%; }
   .ghost-button::after { content: "+"; font-size: 17px; }

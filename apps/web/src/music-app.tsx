@@ -304,6 +304,28 @@ export default function MusicApp({ initialTracks }: Props) {
     () => tracks.find((track) => track.id === activeId) ?? tracks[0],
     [activeId, tracks]
   );
+  const favoriteTracks = useMemo(
+    () => tracks.filter((track) => favorites.has(track.id)),
+    [favorites, tracks]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void api.tracks()
+      .then((remoteTracks) => {
+        if (cancelled) return;
+        setTracks((current) => {
+          const remoteIds = new Set(remoteTracks.map((track) => track.id));
+          return [...remoteTracks, ...current.filter((track) => !remoteIds.has(track.id))];
+        });
+      })
+      .catch(() => {
+        // Keep the built-in demo usable while a self-hosted API is offline.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const audio = new Audio();
@@ -476,7 +498,9 @@ export default function MusicApp({ initialTracks }: Props) {
 
   function seek(value: number) {
     setElapsed(value);
-    if (audioRef.current) audioRef.current.currentTime = value;
+    if (audioRef.current && activeTrack && !activeTrack.streamUrl.startsWith("/audio/")) {
+      audioRef.current.currentTime = value;
+    }
   }
 
   if (viewMode === "ios") {
@@ -546,7 +570,7 @@ export default function MusicApp({ initialTracks }: Props) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
-            <kbd>⌘ K</kbd>
+            <button type="submit" aria-label="Submit search">Search</button>
           </form>
           <ViewToggle value={viewMode} onChange={setViewMode} />
           <button className="ghost-button" onClick={checkServer}>Connect a server</button>
@@ -624,6 +648,35 @@ export default function MusicApp({ initialTracks }: Props) {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section className="section track-section" id="liked">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow">Saved in this browser</span>
+                <h2>Liked songs</h2>
+              </div>
+              <span className="section-count">{favoriteTracks.length}</span>
+            </div>
+            {favoriteTracks.length > 0 ? (
+              <div className="track-list">
+                {favoriteTracks.map((track, index) => (
+                  <button className="track-row" key={track.id} onClick={() => selectTrack(track)}>
+                    <span className="row-number">{(index + 1).toString().padStart(2, "0")}</span>
+                    <Artwork track={track} compact />
+                    <span className="track-title"><strong>{track.title}</strong><small>{track.artist}</small></span>
+                    <span className="track-album">{track.album}</span>
+                    <span className="track-time">{formatTime(track.durationSeconds)}</span>
+                    <span className="row-more">▶</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <button className="empty-library" type="button" onClick={toggleFavorite}>
+                <span>♡</span>
+                Save the current track to start your collection.
+              </button>
+            )}
           </section>
         </div>
       </section>
