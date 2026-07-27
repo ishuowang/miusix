@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Miusix
 
-## Getting Started
+Miusix is a self-hosted music product for the web, iOS, and Android. This
+repository is a monorepo containing the user interfaces, API, shared contracts,
+and deployment configuration.
 
-First, run the development server:
+## Repository map
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+apps/
+  web/       Vite + React web player
+  mobile/    Expo app for iOS, Android, and mobile web
+  api/       Fastify API and HTTP-range audio streaming
+packages/
+  contracts/ Shared Zod schemas and TypeScript models
+  sdk/       Typed API client shared by web and mobile
+infra/       Caddy reverse-proxy configuration
+storage/     Local audio storage (files are ignored by Git)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Requirements: Node.js 22+, npm, and optionally Docker.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+cp .env.example .env
+npm run dev:api
+npm run dev:web
+```
 
-## Learn More
+In another terminal, start the native client:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev:mobile
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The web app runs on `http://localhost:3000`; the API runs on
+`http://localhost:4000`. Expo prints QR codes and platform launch options.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Self-hosting
 
-## Deploy on Vercel
+Set a strong `POSTGRES_PASSWORD` in `.env`, then run:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+docker compose up --build -d
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Caddy serves the web app and proxies `/api/*` to the API. PostgreSQL data is
+stored in a named Docker volume. Put MP3 files in `storage/media` using the
+track UUID as the filename:
+
+```text
+storage/media/45a6ad78-bdd2-4f5e-9737-4858c929f238.mp3
+```
+
+The stream endpoint supports HTTP range requests for seeking. Production work
+should add authentication, an upload/admin workflow, background metadata
+processing, and object storage before allowing untrusted users.
+
+## Configuration
+
+Never commit `.env` files. Start from `.env.example` and keep production values
+in the server's secret manager. The old repository version accidentally tracked
+credentials; all previously exposed Supabase, PostgreSQL, and Vercel secrets
+must be rotated even after the file is removed.
