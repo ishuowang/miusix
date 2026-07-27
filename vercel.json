@@ -3,5 +3,15 @@
   "framework": "vite",
   "installCommand": "npm install",
   "buildCommand": "npm run build --workspace @miusix/web",
-  "outputDirectory": "apps/web/dist"
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/ios",
+      "destination": "/ios/index.html"
+    },
+    {
+      "source": "/ios/",
+      "destination": "/ios/index.html"
+    }
+  ]
 }

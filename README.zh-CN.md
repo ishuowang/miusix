@@ -48,7 +48,10 @@
   </tr>
 </table>
 
-Web 端用于搜索、音乐库、收藏、歌单和播放队列；切换到 iOS 视图后，播放状态会进入皮革、黑胶、拉丝金属和 LCD 组成的拟物唱机界面。
+两个界面是完全隔离的页面，不再把同一套 React 组件换皮：
+[`/`](https://miusix.vercel.app/) 是可搜索、收藏、管理歌单和播放队列的
+Web 工作台；[`/ios/`](https://miusix.vercel.app/ios/) 直接运行原始的独立
+HTML bundle，保留黑胶唱机、搜索、收藏、歌单和硬件外观定制交互。
 
 ## 系统如何协作
 
@@ -128,7 +131,7 @@ erDiagram
 ```text
 miusix/
 ├── apps/
-│   ├── web/          React 19 + Vite Web 播放器
+│   ├── web/          React 19 Web 应用 + 独立 /ios HTML 应用
 │   ├── mobile/       Expo iOS / Android 客户端基础
 │   └── api/          Fastify、yt-dlp、Range 流媒体
 ├── packages/
