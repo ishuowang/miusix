@@ -30,10 +30,30 @@ export const catalogSchema = z.object({
   playlists: z.array(playlistSchema),
 });
 
+export const mediaSearchResultSchema = z.object({
+  provider: z.literal("youtube"),
+  sourceId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  durationSeconds: z.number().int().nonnegative(),
+  thumbnailUrl: z.string().url().optional(),
+});
+
+export const importMediaRequestSchema = mediaSearchResultSchema.pick({
+  provider: true,
+  sourceId: true,
+  title: true,
+  artist: true,
+  durationSeconds: true,
+  thumbnailUrl: true,
+});
+
 export type Artwork = z.infer<typeof artworkSchema>;
 export type Track = z.infer<typeof trackSchema>;
 export type Playlist = z.infer<typeof playlistSchema>;
 export type Catalog = z.infer<typeof catalogSchema>;
+export type MediaSearchResult = z.infer<typeof mediaSearchResultSchema>;
+export type ImportMediaRequest = z.infer<typeof importMediaRequestSchema>;
 
 export type ApiHealth = {
   status: "ok";

@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-miusix}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
       - ./apps/api/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-miusix}"]
@@ -29,8 +29,9 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-miusix}:${POSTGRES_PASSWORD:-change-me}@db:5432/${POSTGRES_DB:-miusix}
       MEDIA_ROOT: /data/media
       WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost}
+      ENABLE_YOUTUBE_IMPORTS: ${ENABLE_YOUTUBE_IMPORTS:-false}
     volumes:
-      - ./storage/media:/data/media:ro
+      - ./storage/media:/data/media
 
   web:
     build:
