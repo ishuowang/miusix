@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/ios",
-      "destination": "/ios/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/ios/",
-      "destination": "/ios/index.html"
+      "destination": "/index.html"
     }
   ]
 }

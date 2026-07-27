@@ -48,10 +48,11 @@
   </tr>
 </table>
 
-两个界面是完全隔离的页面，不再把同一套 React 组件换皮：
-[`/`](https://miusix.vercel.app/) 是可搜索、收藏、管理歌单和播放队列的
-Web 工作台；[`/ios/`](https://miusix.vercel.app/ios/) 直接运行原始的独立
-HTML bundle，保留黑胶唱机、搜索、收藏、歌单和硬件外观定制交互。
+两套界面保留不同的渲染运行时，不再把同一组 React 组件换皮，但已经装进
+同一个前端应用：[`/`](https://miusix.vercel.app/) 是 Web 工作台；切换到
+[`/ios/`](https://miusix.vercel.app/ios/) 时不会整页跳转，而是由 React
+外壳嵌入同源的原始 HTML bundle。React 会把当前环境的 API 地址传给唱机，
+因此搜索、yt-dlp 导入、真实音频流、收藏、歌单和外观定制都能保留。
 
 ## 系统如何协作
 
@@ -131,7 +132,7 @@ erDiagram
 ```text
 miusix/
 ├── apps/
-│   ├── web/          React 19 Web 应用 + 独立 /ios HTML 应用
+│   ├── web/          React 19 外壳 + 嵌入式 /ios 拟物 HTML 运行时
 │   ├── mobile/       Expo iOS / Android 客户端基础
 │   └── api/          Fastify、yt-dlp、Range 流媒体
 ├── packages/

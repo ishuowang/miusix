@@ -116,6 +116,31 @@ function ViewToggle({ value, onChange, inverse = false }: {
   );
 }
 
+function EmbeddedIos({ onViewChange }: { onViewChange: (mode: ViewMode) => void }) {
+  const source = `/ios/index.html?embedded=1&api=${encodeURIComponent(apiBase)}`;
+
+  return (
+    <main className="ios-embed-stage">
+      <header className="ios-embed-header">
+        <a className="ios-preview-brand" href="/" aria-label="Miusix home" onClick={(event) => {
+          event.preventDefault();
+          onViewChange("web");
+        }}>
+          <span className="brand-mark">M</span><span>MIUSIX</span>
+        </a>
+        <span className="ios-preview-label">Original tactile HTML · embedded</span>
+        <ViewToggle value="ios" onChange={onViewChange} inverse />
+      </header>
+      <iframe
+        className="ios-embed-frame"
+        src={source}
+        title="Miusix tactile iOS player"
+        allow="autoplay"
+      />
+    </main>
+  );
+}
+
 function PlaylistPicker({
   track,
   playlists,
@@ -519,6 +544,10 @@ export default function MusicApp({ initialTracks }: Props) {
   const [activeId, setActiveId] = useState(initialTracks[0]?.id ?? "");
   const [playing, setPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(38);
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    window.location.pathname === "/ios" || window.location.pathname === "/ios/"
+      ? "ios"
+      : "web");
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MediaSearchResult[]>([]);
   const [localSearchResults, setLocalSearchResults] = useState<Track[]>([]);
@@ -547,6 +576,18 @@ export default function MusicApp({ initialTracks }: Props) {
   );
 
   useEffect(() => {
+    const syncViewWithUrl = () => {
+      setViewMode(
+        window.location.pathname === "/ios" || window.location.pathname === "/ios/"
+          ? "ios"
+          : "web",
+      );
+    };
+    window.addEventListener("popstate", syncViewWithUrl);
+    return () => window.removeEventListener("popstate", syncViewWithUrl);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     void api.tracks()
       .then((remoteTracks) => {
@@ -567,6 +608,22 @@ export default function MusicApp({ initialTracks }: Props) {
   useEffect(() => {
     localStorage.setItem("miusix:playlists", JSON.stringify(playlists));
   }, [playlists]);
+
+  useEffect(() => {
+    const syncSharedStorage = (event: StorageEvent) => {
+      if (event.key === "miusix:favorites") {
+        setFavorites(new Set(loadIds("miusix:favorites")));
+      }
+      if (event.key === "miusix:playlists") {
+        setPlaylists(loadPlaylists());
+      }
+      if (event.key === "miusix:queue") {
+        setQueueIds(loadIds("miusix:queue"));
+      }
+    };
+    window.addEventListener("storage", syncSharedStorage);
+    return () => window.removeEventListener("storage", syncSharedStorage);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("miusix:queue", JSON.stringify(queueIds));
@@ -775,9 +832,11 @@ export default function MusicApp({ initialTracks }: Props) {
   }
 
   function changeView(mode: ViewMode) {
-    if (mode === "ios") {
-      window.location.assign("/ios/");
+    const nextPath = mode === "ios" ? "/ios/" : "/";
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, "", nextPath);
     }
+    setViewMode(mode);
   }
 
   const sharedOverlays = (
@@ -802,6 +861,10 @@ export default function MusicApp({ initialTracks }: Props) {
       />
     </>
   );
+
+  if (viewMode === "ios") {
+    return <EmbeddedIos onViewChange={changeView} />;
+  }
 
   return (
     <main className="studio-shell">
@@ -831,7 +894,7 @@ export default function MusicApp({ initialTracks }: Props) {
             <button type="submit">{searchStatus === "searching" ? "Searching…" : "Search"}</button>
           </form>
           <div className="studio-topbar__actions">
-            <ViewToggle value="web" onChange={changeView} />
+            <ViewToggle value={viewMode} onChange={changeView} />
             <button className="studio-server" type="button" onClick={checkServer}>Check server</button>
           </div>
         </header>
