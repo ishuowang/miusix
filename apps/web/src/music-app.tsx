@@ -72,18 +72,22 @@ function ViewToggle({
 
 function SearchResults({
   results,
+  localResults,
   status,
   message,
   compact = false,
   onSelect,
+  onLocalSelect,
 }: {
   results: MediaSearchResult[];
+  localResults: Track[];
   status: SearchStatus;
   message: string;
   compact?: boolean;
   onSelect: (result: MediaSearchResult) => void;
+  onLocalSelect: (track: Track) => void;
 }) {
-  if (status === "idle" && results.length === 0 && !message) return null;
+  if (status === "idle" && results.length === 0 && localResults.length === 0 && !message) return null;
   return (
     <section className={`search-results ${compact ? "search-results--compact" : ""}`} aria-live="polite">
       <div className="search-results__heading">
@@ -92,6 +96,14 @@ function SearchResults({
       </div>
       {status === "error" && <p className="search-results__error">{message}</p>}
       <div className="search-results__list">
+        {localResults.map((track) => (
+          <button type="button" key={track.id} onClick={() => onLocalSelect(track)}>
+            <Artwork track={track} compact />
+            <span><strong>{track.title}</strong><small>{track.artist} · local demo</small></span>
+            <time>{formatTime(track.durationSeconds)}</time>
+            <b>▶</b>
+          </button>
+        ))}
         {results.map((result) => (
           <button type="button" key={result.sourceId} onClick={() => onSelect(result)} disabled={status === "importing"}>
             {result.thumbnailUrl
@@ -114,6 +126,7 @@ type IosPreviewProps = {
   favorite: boolean;
   query: string;
   searchResults: MediaSearchResult[];
+  localSearchResults: Track[];
   searchStatus: SearchStatus;
   searchMessage: string;
   onPlayPause: () => void;
@@ -121,6 +134,7 @@ type IosPreviewProps = {
   onQueryChange: (query: string) => void;
   onSearch: (event: React.FormEvent<HTMLFormElement>) => void;
   onSearchResult: (result: MediaSearchResult) => void;
+  onLocalSearchResult: (track: Track) => void;
   onSelectTrack: (track: Track) => void;
   onViewChange: (mode: ViewMode) => void;
 };
@@ -132,6 +146,7 @@ function IosPreview({
   favorite,
   query,
   searchResults,
+  localSearchResults,
   searchStatus,
   searchMessage,
   onPlayPause,
@@ -139,6 +154,7 @@ function IosPreview({
   onQueryChange,
   onSearch,
   onSearchResult,
+  onLocalSearchResult,
   onSelectTrack,
   onViewChange
 }: IosPreviewProps) {
@@ -187,9 +203,11 @@ function IosPreview({
             <SearchResults
               compact
               results={searchResults}
+              localResults={localSearchResults}
               status={searchStatus}
               message={searchMessage}
               onSelect={onSearchResult}
+              onLocalSelect={onLocalSearchResult}
             />
 
             <section className="ios-mix">
@@ -270,6 +288,7 @@ export default function MusicApp({ initialTracks }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>("web");
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<MediaSearchResult[]>([]);
+  const [localSearchResults, setLocalSearchResults] = useState<Track[]>([]);
   const [searchStatus, setSearchStatus] = useState<SearchStatus>("idle");
   const [searchMessage, setSearchMessage] = useState("");
   const [favorites, setFavorites] = useState<Set<string>>(() => {
@@ -397,11 +416,20 @@ export default function MusicApp({ initialTracks }: Props) {
     try {
       const results = await api.search(value);
       setSearchResults(results);
+      setLocalSearchResults([]);
       setSearchStatus("idle");
       setSearchMessage(results.length ? `${results.length} results` : "No results");
     } catch (error) {
-      setSearchStatus("error");
-      setSearchMessage(error instanceof Error ? error.message : "Search failed");
+      const normalized = value.toLocaleLowerCase();
+      const matches = tracks.filter((track) =>
+        [track.title, track.artist, track.album].some((field) =>
+          field.toLocaleLowerCase().includes(normalized)));
+      setSearchResults([]);
+      setLocalSearchResults(matches);
+      setSearchStatus(matches.length ? "idle" : "error");
+      setSearchMessage(matches.length
+        ? `API unavailable · ${matches.length} local result${matches.length === 1 ? "" : "s"}`
+        : error instanceof Error ? error.message : "Search failed");
     }
   }
 
@@ -413,6 +441,7 @@ export default function MusicApp({ initialTracks }: Props) {
       setTracks((current) => [track, ...current.filter((item) => item.id !== track.id)]);
       setActiveId(track.id);
       setSearchResults([]);
+      setLocalSearchResults([]);
       setSearchStatus("idle");
       setSearchMessage("Ready to play");
       setPlaying(true);
@@ -426,6 +455,7 @@ export default function MusicApp({ initialTracks }: Props) {
     setSearchStatus("searching");
     setSearchMessage("Checking API…");
     setSearchResults([]);
+    setLocalSearchResults([]);
     try {
       const health = await api.health();
       setSearchStatus("idle");
@@ -458,6 +488,7 @@ export default function MusicApp({ initialTracks }: Props) {
         favorite={favorites.has(activeTrack.id)}
         query={query}
         searchResults={searchResults}
+        localSearchResults={localSearchResults}
         searchStatus={searchStatus}
         searchMessage={searchMessage}
         onPlayPause={() => setPlaying(!playing)}
@@ -465,6 +496,11 @@ export default function MusicApp({ initialTracks }: Props) {
         onQueryChange={setQuery}
         onSearch={search}
         onSearchResult={importSearchResult}
+        onLocalSearchResult={(track) => {
+          setLocalSearchResults([]);
+          setSearchMessage("");
+          selectTrack(track);
+        }}
         onSelectTrack={selectTrack}
         onViewChange={setViewMode}
       />
@@ -519,9 +555,15 @@ export default function MusicApp({ initialTracks }: Props) {
         <div className="page-content">
           <SearchResults
             results={searchResults}
+            localResults={localSearchResults}
             status={searchStatus}
             message={searchMessage}
             onSelect={importSearchResult}
+            onLocalSelect={(track) => {
+              setLocalSearchResults([]);
+              setSearchMessage("");
+              selectTrack(track);
+            }}
           />
           <section className="hero-card" id="mix">
             <div className="hero-copy">
