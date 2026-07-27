@@ -5,7 +5,7 @@ function iosReferencePage(): Plugin {
   const installRewrite = (middlewares: Connect.Server) => {
     middlewares.use((request, _response, next) => {
       if (request.url === "/ios" || request.url === "/ios/") {
-        request.url = "/ios/index.html";
+        request.url = "/index.html";
       }
       next();
     });

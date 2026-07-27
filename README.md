@@ -52,11 +52,14 @@ It keeps the entire listening loop in one TypeScript monorepo:
   </tr>
 </table>
 
-The two interfaces are deliberately isolated instead of restyling one React
-tree. [`/`](https://miusix.vercel.app/) is the functional Web library, search,
-playlist, and queue workspace. [`/ios/`](https://miusix.vercel.app/ios/) runs
-the original standalone tactile HTML bundle with its own turntable, search,
-favorites, playlists, and hardware customization interactions.
+The two interfaces keep separate rendering runtimes instead of restyling one
+React tree, but now live inside the same frontend application.
+[`/`](https://miusix.vercel.app/) is the Web library, search, playlist, and
+queue workspace. Switching to [`/ios/`](https://miusix.vercel.app/ios/) keeps
+the React shell mounted and embeds the original tactile HTML in a same-origin
+frame. React passes the configured API endpoint into that frame, where search,
+yt-dlp import, audio streaming, favorites, playlists, and customization remain
+available without compromising the reference layout.
 
 ## How the pieces connect
 
@@ -136,7 +139,7 @@ The audio file lives in `storage/media` or object storage. PostgreSQL/Supabase k
 ```text
 miusix/
 ├── apps/
-│   ├── web/          React 19 Web app + isolated /ios HTML app
+│   ├── web/          React 19 shell + embedded tactile /ios HTML runtime
 │   ├── mobile/       Expo foundation for iOS and Android
 │   └── api/          Fastify API, yt-dlp adapter, range streaming
 ├── packages/
