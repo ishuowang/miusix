@@ -8,7 +8,7 @@ runtime, resources, SVGs, state, and interaction logic intact.
 
 Usage:
     python3 tools/import_ios_reference.py justpaste.html \
-        apps/web/public/ios/index.html
+        apps/web/public/tactile-player.html
 """
 
 from __future__ import annotations

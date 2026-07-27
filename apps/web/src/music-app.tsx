@@ -117,7 +117,7 @@ function ViewToggle({ value, onChange, inverse = false }: {
 }
 
 function EmbeddedIos({ onViewChange }: { onViewChange: (mode: ViewMode) => void }) {
-  const source = `/ios/index.html?embedded=1&api=${encodeURIComponent(apiBase)}`;
+  const source = `/tactile-player.html?embedded=1&api=${encodeURIComponent(apiBase)}`;
 
   return (
     <main className="ios-embed-stage">
